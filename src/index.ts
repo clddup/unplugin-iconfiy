@@ -5,20 +5,18 @@ import { createUnplugin } from 'unplugin'
 import fg from 'fast-glob'
 import { getIcons } from '@iconify/utils'
 import { lookupCollection, lookupCollections } from '@iconify/json'
+import { parse } from 'acorn-loose'
+import { simple } from 'acorn-walk'
 
 export const unpluginFactory: UnpluginFactory<Options | undefined> = async options => {
   const virtualModuleId = 'virtual:icon'
   const resolvedVirtualModuleId = '\0' + virtualModuleId
   const icons = await lookupCollections()
   const iconList = Object.keys(icons)
-  const iconObj = new Map()
-  const iconArr = []
-  const parseIcon: {[key:string]: Array<string>} = {}
-  for(const i of iconList){
-    iconObj.set(i, await lookupCollection(i))
-    iconArr.push(i)
-  }
-  const iconKeyReg = new RegExp(iconArr.join(':|') + ':', 'g')
+  const iconObj: {
+    [key: string]: Set<string>
+  } = {}
+
   return {
     name: 'unplugin-iconify-icons',
     resolveId(id: string) {
@@ -28,32 +26,40 @@ export const unpluginFactory: UnpluginFactory<Options | undefined> = async optio
     },
     async load(id: string) {
       if (id === resolvedVirtualModuleId) {
-        let files = fg.sync('**/*.{js,jsx,ts,tsx,vue}', {
+        const files = fg.sync('**/*.{js,jsx,ts,tsx,vue,json}', {
           cwd: 'src',
           stats: true,
           absolute: true,
         })
         files.forEach((item: any) => {
-          const fileContent = fs.readFileSync(item.path, 'utf-8')
-          const matchArr = fileContent.match(iconKeyReg)
-          if (matchArr) {
-            Array.from(new Set(matchArr)).forEach(async (item1: string) => {
-              const key = item1.slice(0, -1)
-              if (!iconObj.get(key)) {
-                iconObj.set(key, await lookupCollection(key))
+          const code = fs.readFileSync(item.path, 'utf-8')
+          const ast = parse.bind(parse)(code, {
+            ecmaVersion: 2020, // 一定要显式指定
+            sourceType: 'module',
+            locations: true,
+          })
+          simple(ast, {
+            Literal(node: any) {
+              if (node.value) {
+                const [iconKey, iconValue] = String(node.value).split(':') || []
+                if (iconList.includes(iconKey)) {
+                  if (!iconObj[iconKey]) {
+                    iconObj[iconKey] = new Set()
+                  }
+                  iconValue && iconObj[iconKey].add(iconValue)
+                }
               }
-              const iconList = fileContent.match(new RegExp(Object.keys(iconObj.get(key).icons).map(item2 => item1 + item2).join('|'), 'g'))
-              if(iconList && iconList.length > 0){
-                parseIcon[key] = (parseIcon[key] || []).concat(iconList.filter(item => item).map(item => item.split(':')[1]))
-              }
-            })
-          }
-          
+            },
+          })
         })
-        const iconListArr = []
-        for(const item in parseIcon){
-          iconListArr.push(getIcons(iconObj.get(item), parseIcon[item]))
+
+        const iconListArr: Array<any> = []
+        for (const key of Object.keys(iconObj)) {
+          if (iconObj[key].size > 0) {
+            iconListArr.push(getIcons(await lookupCollection(key), [...iconObj[key]]))
+          }
         }
+
         return `
           const iconList = ${JSON.stringify(iconListArr)}
           const svgNS = 'http://www.w3.org/2000/svg'
