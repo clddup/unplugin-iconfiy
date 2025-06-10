@@ -31,9 +31,6 @@ export default defineConfig({
     vue(),
     vueJsx(),
     UnoCSS(),
-    createSvgIconsPlugin({
-      iconDirs: [fileURLToPath(new URL('./src/assets/icon', import.meta.url))]
-    }),
     Icon()
   ],
   resolve: {
@@ -48,3 +45,58 @@ main.js
 ```js
 import 'virtual:offline-iconify'
 ```
+
+以react为例封装 Icon 组件, 这里只是简单示例封装，其余框架也类似,
+
+```jsx
+export default function Icon(props){
+  return <>
+    <svg style={{
+      fontSize: props.size || '16px',
+      color: props.fill,
+      width: '1em',
+      height: '1em',
+    }}>
+      <use xlinkHref={'#' + props.name} />
+    </svg>
+  </>
+}
+```
+在其他组件里引用
+```jsx
+import Icon from './component/Icon.jsx'
+
+function App() {
+  const [count, setCount] = useState(0)
+
+  return (
+    <>
+      <div>
+        <a href="https://vite.dev" target="_blank">
+          <img src={viteLogo} className="logo" alt="Vite logo" />
+        </a>
+        <a href="https://react.dev" target="_blank">
+          <img src={reactLogo} className="logo react" alt="React logo" />
+        </a>
+      </div>
+      <h1>Vite + React</h1>
+      <div className="card">
+        <button onClick={() => setCount((count) => count + 1)}>
+          count is {count}
+        </button>
+        <p>
+          Edit <code>src/App.jsx</code> and save to test HMR
+        </p>
+      </div>
+      <p className="read-the-docs">
+        Click on the Vite and React logos to learn more
+      </p>
+      <div>Icon示例</div>
+      <Icon name="ant-design:account-book-twotone" size="40px" fill="red" />
+    </>
+  )
+}
+```
+效果
+
+![](./img/demo.png)
