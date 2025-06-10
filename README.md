@@ -16,34 +16,33 @@ iconfiy 本地化插件，按需加载，无需请求远程icon
 ```bash
 npm i unplugin-offline-iconify -D
 ```
+以 vite + react 为例
 
 vite.config.js
 ```js
-import { fileURLToPath, URL } from 'node:url'
-import vue from '@vitejs/plugin-vue'
-import vueJsx from '@vitejs/plugin-vue-jsx'
-import UnoCSS from 'unocss/vite'
-import Icon from 'unplugin-offline-iconify/vite'
 import { defineConfig } from 'vite'
-// https://vitejs.dev/config/
+import react from '@vitejs/plugin-react'
+import Icon from 'unplugin-offline-iconify/vite'
+// https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    vue(),
-    vueJsx(),
-    UnoCSS(),
-    Icon()
-  ],
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
-  },
+  plugins: [react(), Icon()],
 })
 ```
 
-main.js
+main.jsx
 ```js
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
 import 'virtual:offline-iconify'
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+
 ```
 
 以react为例封装 Icon 组件, 这里只是简单示例封装，其余框架也类似,
