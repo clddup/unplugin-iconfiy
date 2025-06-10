@@ -1,15 +1,15 @@
-import fs from 'node:fs'
 import type { UnpluginFactory } from 'unplugin'
 import type { Options } from './types'
-import { createUnplugin } from 'unplugin'
-import fg from 'fast-glob'
-import { getIcons } from '@iconify/utils'
+import fs from 'node:fs'
 import { lookupCollection, lookupCollections } from '@iconify/json'
+import { getIcons } from '@iconify/utils'
 import { parse } from 'acorn-loose'
 import { simple } from 'acorn-walk'
+import fg from 'fast-glob'
+import { createUnplugin } from 'unplugin'
 
-export const unpluginFactory: UnpluginFactory<Options | undefined> = async options => {
-  const virtualModuleId = 'virtual:icon'
+export const unpluginFactory: UnpluginFactory<Options | undefined> = async () => {
+  const virtualModuleId = 'virtual:offline-iconify'
   const resolvedVirtualModuleId = '\0' + virtualModuleId
   const icons = await lookupCollections()
   const iconList = Object.keys(icons)
