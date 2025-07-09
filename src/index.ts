@@ -34,7 +34,7 @@ export const unpluginFactory: UnpluginFactory<Options | undefined> = async () =>
         files.forEach((item: any) => {
           const code = fs.readFileSync(item.path, 'utf-8')
           const ast = parse.bind(parse)(code, {
-            ecmaVersion: 2020, // 一定要显式指定
+            ecmaVersion: 5,
             sourceType: 'module',
             locations: true,
           })
