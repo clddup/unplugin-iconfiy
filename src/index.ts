@@ -8,11 +8,9 @@ import { simple } from 'acorn-walk'
 import fg from 'fast-glob'
 import { createUnplugin } from 'unplugin'
 
-export const unpluginFactory: UnpluginFactory<Options | undefined> = async () => {
+export const unpluginFactory: UnpluginFactory<Options | undefined> = () => {
   const virtualModuleId = 'virtual:offline-iconify'
-  const resolvedVirtualModuleId = '\0' + virtualModuleId
-  const icons = await lookupCollections()
-  const iconList = Object.keys(icons)
+  const resolvedVirtualModuleId = `\0${virtualModuleId}`
   const iconObj: {
     [key: string]: Set<string>
   } = {}
@@ -26,7 +24,9 @@ export const unpluginFactory: UnpluginFactory<Options | undefined> = async () =>
     },
     async load(id: string) {
       if (id === resolvedVirtualModuleId) {
-        const files = fg.sync('**/*.{js,jsx,ts,tsx,vue,json}', {
+        const icons = await lookupCollections()
+        const iconList = Object.keys(icons)
+        const files = fg.sync('**/*.{js,jsx,ts,tsx,vue,json,astro}', {
           cwd: 'src',
           stats: true,
           absolute: true,
@@ -52,7 +52,6 @@ export const unpluginFactory: UnpluginFactory<Options | undefined> = async () =>
             },
           })
         })
-
         const iconListArr: Array<any> = []
         for (const key of Object.keys(iconObj)) {
           if (iconObj[key].size > 0) {
@@ -61,7 +60,7 @@ export const unpluginFactory: UnpluginFactory<Options | undefined> = async () =>
         }
 
         return `
-          const iconList = ${JSON.stringify(iconListArr)}
+          const iconList = ${JSON.stringify(iconListArr.filter(item => item))}
           const svgNS = 'http://www.w3.org/2000/svg'
           const xlinkNS = 'http://www.w3.org/1999/xlink'
           const svgEl = document.createElementNS(svgNS, 'svg')

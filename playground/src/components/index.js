@@ -1,0 +1,23 @@
+const iconList = [
+  'el:align-center',
+  'el:align-left',
+  'el:align-right',
+  'el:arrow-down',
+  'el:arrow-left',
+  'el:arrow-right',
+  'el:arrow-up',
+  'el:back',
+  'el:bell',
+  'el:bell-filled',
+  'el:bicycle',
+  'el:bottom',
+  'el:bottom-left',
+  'el:bottom-right',
+  'el:brush',
+  'el:bug',
+  'el:cake',
+  'el:calendar',
+  'ant-design:align-left-outlined',  
+  'flag:ag-4x3',
+  'ep:briefcase'
+]
