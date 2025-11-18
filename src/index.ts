@@ -55,7 +55,8 @@ export const unpluginFactory: UnpluginFactory<Options | undefined> = () => {
         const iconListArr: Array<any> = []
         for (const key of Object.keys(iconObj)) {
           if (iconObj[key].size > 0) {
-            iconListArr.push(getIcons(await lookupCollection(key), [...iconObj[key]]))
+            const item = getIcons(await lookupCollection(key), [...iconObj[key]])
+            item && iconListArr.push(item)
           }
         }
 
